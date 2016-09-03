@@ -5,7 +5,7 @@ Currently it supports powering on and off Android TV based Sony Bravia TVs using
 # Installation
 
 1. Install homebridge using: npm install -g homebridge
-2. Somehow get this code.
+2. Install this plugin using: npm install -g homebridge-sonybraviatv
 3. Update your configuration file. See below for a sample.
 
 # Configuration
