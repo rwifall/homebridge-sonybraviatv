@@ -44,7 +44,7 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback)
 
     if (!err && response.statusCode == 200) {
       var json = JSON.parse(body);
-      var status = result[0].status;
+      var status = json.result[0].status;
       this.log("TV status is %s", status);
       var isOn = state == "active";
       callback(null, isOn); // success
