@@ -29,12 +29,12 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback)
 {
   this.log("Getting whether Sony TV is on...");
 
-  var postData = {
+  var postData = JSON.stringify({
     method: 'getPowerStatus',
     params: [],
     id: 1,
     version: '1.0'
-  };
+  });
 
   request.post({
     url: "http://"+this.ipaddress + "/sony/system",
@@ -46,7 +46,7 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback)
       var json = JSON.parse(body);
       var status = json.result[0].status;
       this.log("TV status is %s", status);
-      var isOn = state == "active";
+      var isOn = status == "active";
       callback(null, isOn); // success
     }
     else {
@@ -59,12 +59,12 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback)
 SonyBraviaTVAccessory.prototype.setOn = function(value, callback) {
   this.log("Set value to %s", value);
 
-  var postData = {
+  var postData = JSON.stringify({
     method: 'setPowerStatus',
     params: [{'status':value}],
     id: 1,
     version: '1.0'
-  };
+  });
 
 
   request.post({
