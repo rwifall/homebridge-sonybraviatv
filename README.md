@@ -1,6 +1,6 @@
 # homebridge-sonybraviatv
 A home bridge plugin for Sony Bravia TVs based on Android TV.
-Currently it supports powering on and off Android TV based Sony Bravia TVs using a preshared key.
+Currently it supports powering on and off TVs using a preshared key.
 
 # Installation
 
