@@ -57,6 +57,7 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback)
 }
 
 SonyBraviaTVAccessory.prototype.setOn = function(value, callback) {
+  value = Boolean(value);
   this.log("Set value to %s", value);
 
   var postData = JSON.stringify({
