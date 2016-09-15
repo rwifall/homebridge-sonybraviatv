@@ -50,7 +50,12 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback)
       callback(null, isOn); // success
     }
     else {
-      this.log("Error getting TV status (status code %s): %s", response.statusCode, err);
+      if (response != null) {
+        this.log("Error getting TV status (status code %s): %s", response.statusCode, err);
+      }
+      else {
+        this.log("Error getting TV status: %s", err);
+      }
       callback(err);
     }
   }.bind(this));
