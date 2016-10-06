@@ -18,6 +18,7 @@ On your TV go to Settings->Network->Home network->IP Control.
   Change Authentication to "Normal and Pre-Shared Key".
   Enter something for the Pre-Shared Key.
   Put that same string in the presharedkey field.
+If your TV requires Wake-on-Lan to power-on, enter your TV MAC address in the macaddress field.
 
 
 Configuration sample:
@@ -28,6 +29,21 @@ Configuration sample:
 		"accessory": "SonyBraviaTV",
 		"name": "My TV Name",
 		"ipaddress": "YOUR TV IP ADDRESS HERE",
+		"presharedkey": "YOUR PRESHARED KEY HERE"
+  }
+    ]
+```
+
+NOTE: Some Sony Bravia TVs require Wake-on-Lan to power on.
+  If your TV is one of these, then you will need to add the macaddress field to your configuration as shown below.
+
+```
+"accessories": [
+	{
+		"accessory": "SonyBraviaTV",
+		"name": "My TV Name",
+        "macaddress": "01:02:03:04:05:06",
+		"ipaddress": "YOUR TV IP ADDRESS HERE",        
 		"presharedkey": "YOUR PRESHARED KEY HERE"
   }
     ]
