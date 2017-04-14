@@ -48,3 +48,19 @@ NOTE: Some Sony Bravia TVs require Wake-on-Lan to power on.
   }
     ]
 ```
+
+NOTE: If you wish to use the state of your TV as a trigger for automation, the plugin must regularly update it. To achieve this, polling must be enabled.
+
+```
+"accessories": [
+	{
+		"accessory": "SonyBraviaTV",
+		"name": "My TV Name",
+        "macaddress": "01:02:03:04:05:06",
+		"ipaddress": "YOUR TV IP ADDRESS HERE",
+		"presharedkey": "YOUR PRESHARED KEY HERE",
+    "polling": true,
+    "interval": 1
+  }
+    ]
+```
