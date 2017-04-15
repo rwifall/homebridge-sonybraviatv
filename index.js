@@ -87,10 +87,10 @@ SonyBraviaTVAccessory.prototype.getOn = function(callback) {
     this.log("Getting whether Sony TV is on...");
 
     if (this.polling) {
-        callback(null, this.isOn)
+        callback(null, this.isOn);
     } else {
         this.getState(function(err, isOn) {
-              this.log("State is: %s", isOn ? "on" : "off")
+              if (err == null) this.log("State is: %s", isOn ? "on" : "off");
               callback(err, isOn);
         }.bind(this));
     }
