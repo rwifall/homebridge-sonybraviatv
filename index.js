@@ -11,12 +11,15 @@ module.exports = function(homebridge) {
 
 function SonyBraviaTVAccessory(log, config) {
     this.log = log;
-
     this.name = config["name"];
     this.psk = config["presharedkey"];
     this.ipaddress = config["ipaddress"];
     this.macaddress = config["macaddress"];
+    this.polling = config["polling"] === true;
+    this.interval = parseInt(config["interval"], 10) | 1;
 
+    this.timer;
+    this.isOn;
 
     this.service = new Service.Switch(this.name);
 
@@ -25,56 +28,87 @@ function SonyBraviaTVAccessory(log, config) {
         .on('get', this.getOn.bind(this))
         .on('set', this.setOn.bind(this));
 
+    this.updateTimer();
+}
+
+SonyBraviaTVAccessory.prototype.runTimer = function() {
+    this.getState(function(err, isOn) {
+        if (err == null && isOn != this.isOn) {
+            this.log("State changed: %s", isOn ? "on" : "off");
+            this.service.getCharacteristic(Characteristic.On).updateValue(isOn);
+            this.isOn = isOn;
+        }
+    }.bind(this));
+}
+
+SonyBraviaTVAccessory.prototype.updateTimer = function() {
+    if (this.polling) {
+        clearTimeout(this.timer);
+        setTimeout(function() {
+            this.runTimer();
+            this.updateTimer();
+        }.bind(this), this.interval * 1000);
+    }
+}
+
+SonyBraviaTVAccessory.prototype.getState = function(callback) {
+  var postData = JSON.stringify({
+      method: 'getPowerStatus',
+      params: [],
+      id: 1,
+      version: '1.0'
+  });
+
+  request.post({
+      url: "http://" + this.ipaddress + "/sony/system",
+      headers: {
+          'X-Auth-PSK': this.psk
+      },
+      form: postData
+  }, function(err, response, body) {
+
+      if (!err && response.statusCode == 200) {
+          var json = JSON.parse(body);
+          var status = json.result[0].status;
+          var isOn = status == "active";
+          callback(null, isOn); // success
+      } else {
+          if (response != null) {
+              this.log("Error getting TV status (status code %s): %s", response.statusCode, err);
+              callback(err);
+          } else {
+              callback(null, false);
+          }
+      }
+  }.bind(this));
 }
 
 SonyBraviaTVAccessory.prototype.getOn = function(callback) {
     this.log("Getting whether Sony TV is on...");
 
-    var postData = JSON.stringify({
-        method: 'getPowerStatus',
-        params: [],
-        id: 1,
-        version: '1.0'
-    });
-
-    request.post({
-        url: "http://" + this.ipaddress + "/sony/system",
-        headers: {
-            'X-Auth-PSK': this.psk
-        },
-        form: postData
-    }, function(err, response, body) {
-
-        if (!err && response.statusCode == 200) {
-            var json = JSON.parse(body);
-            var status = json.result[0].status;
-            this.log("TV status is %s", status);
-            var isOn = status == "active";
-            callback(null, isOn); // success
-        } else {
-            if (response != null) {
-                this.log("Error getting TV status (status code %s): %s", response.statusCode, err);
-                callback(err);
-            } else {
-                this.log("Error getting TV status, assuming TV is off: %s.", err);
-                callback(null, false);
-            }
-        }
-    }.bind(this));
+    if (this.polling) {
+        callback(null, this.isOn);
+    } else {
+        this.getState(function(err, isOn) {
+              if (err == null) this.log("State is: %s", isOn ? "on" : "off");
+              callback(err, isOn);
+        }.bind(this));
+    }
 }
 
 SonyBraviaTVAccessory.prototype.setOn = function(value, callback) {
     value = Boolean(value);
-    this.log("Set value to %s", value);
+    this.log("Set state to %s", value ? "on" : "off");
 
     if (value && this.macaddress) {
         wol.wake(this.macaddress, function(error) {
             if (error) {
                 // handle error
-                this.log("Error '%s' setting TV power state using WOL.", error);                
+                this.log("Error '%s' setting TV power state using WOL.", error);
                 callback(error);
             } else {
                 // done sending packets
+                this.updateTimer();
                 callback();
             }
         }.bind(this));
@@ -98,6 +132,7 @@ SonyBraviaTVAccessory.prototype.setOn = function(value, callback) {
         }, function(err, response, body) {
 
             if (!err && response.statusCode == 200) {
+                this.updateTimer();
                 callback(); // success
             } else {
                 this.log("Error '%s' setting TV power state. Response: %s", err, body);
