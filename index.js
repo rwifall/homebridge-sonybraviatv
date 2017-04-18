@@ -44,7 +44,7 @@ SonyBraviaTVAccessory.prototype.runTimer = function() {
 SonyBraviaTVAccessory.prototype.updateTimer = function() {
     if (this.polling) {
         clearTimeout(this.timer);
-        setTimeout(function() {
+        this.timer = setTimeout(function() {
             this.runTimer();
             this.updateTimer();
         }.bind(this), this.interval * 1000);
