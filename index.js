@@ -74,7 +74,8 @@ SonyBraviaTVAccessory.prototype.getState = function(callback) {
       headers: {
           'X-Auth-PSK': this.psk
       },
-      form: postData
+      form: postData,
+      timeout: 500 // default tcp timeout (20-120s) is way to high for home automation triggers
   }, function(err, response, body) {
 
       if (!err && response.statusCode == 200) {
