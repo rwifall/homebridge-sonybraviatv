@@ -33,10 +33,20 @@ function SonyBraviaTVAccessory(log, config) {
 
 SonyBraviaTVAccessory.prototype.runTimer = function() {
     this.getState(function(err, isOn) {
-        if (err == null && isOn != this.isOn) {
-            this.log("State changed: %s", isOn ? "on" : "off");
+        if (err == null) {
+            if (isOn != this.isOn) {
+                this.log("State changed: %s", isOn ? "on" : "off");
+                this.isOn = isOn;
+            }
+            /* *
+             * Always update. Hubs might not have received a recent update, if
+             * they were just switching between sleep and active. This is
+             * especially an issue with TVs, for they often toggle their state
+             * at the same time as an Apple TV. Homebridge framework only
+             * propagates the update, if the recent update failed, so this won't
+             * increase network traffic.
+             */
             this.service.getCharacteristic(Characteristic.On).updateValue(isOn);
-            this.isOn = isOn;
         }
     }.bind(this));
 }
@@ -64,7 +74,8 @@ SonyBraviaTVAccessory.prototype.getState = function(callback) {
       headers: {
           'X-Auth-PSK': this.psk
       },
-      form: postData
+      form: postData,
+      timeout: 500 // default tcp timeout (20-120s) is way to high for home automation triggers
   }, function(err, response, body) {
 
       if (!err && response.statusCode == 200) {
